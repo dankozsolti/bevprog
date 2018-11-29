@@ -68,7 +68,7 @@
  definíciójába beágyazzuk a fa egy csomópontjának az absztrakt jellemzését, ez lesz a
  beágyazott Csomopont osztály. Miért ágyazzuk be? Mert külön nem szánunk neki szerepet, ezzel
  is jelezzük, hogy csak a fa részeként számiolunk vele.*/
-int order(1);
+char order('i');
 class LZWBinFa
 {
 public:
@@ -284,7 +284,7 @@ void kiir (Csomopont * elem, std::ostream & os)
         {
 	  switch (order)
 	  {
-	  case 1:
+	  case 'i':
             ++melyseg;
             kiir (elem->egyesGyermek (), os);
             // ez a postorder bejáráshoz képest
@@ -296,22 +296,18 @@ void kiir (Csomopont * elem, std::ostream & os)
             --melyseg;
 	  break;
 
-	  case 2:
+	  case 'p':
             ++melyseg;
 	    kiir (elem->egyesGyermek (), os);
             kiir (elem->nullasGyermek (), os);
-            // ez a postorder bejáráshoz képest
-            // 1-el nagyobb mélység, ezért -1
             for (int i = 0; i < melyseg; ++i)
             os << "---";
             os << elem->getBetu () << "(" << melyseg - 1 << ")" << std::endl;
             --melyseg;
 	  break;
 
-	  case 3:
+	  case 'k':
             ++melyseg;
-            // ez a postorder bejáráshoz képest
-            // 1-el nagyobb mélység, ezért -1
             for (int i = 0; i < melyseg; ++i)
             os << "---";
             os << elem->getBetu () << "(" << melyseg - 1 << ")" << std::endl;
@@ -320,7 +316,7 @@ void kiir (Csomopont * elem, std::ostream & os)
             --melyseg;
 	  break;
 	  default:
-		std::cout << "Hibás megadási mód" << std::endl;
+		std::cout << "Hibás megadási mód.\ni inorder-ért\np postorder-ért\nk preorder-ért" << std::endl;
 	  break;
 	  }
         }
@@ -498,20 +494,18 @@ main ()
 void
 usage (void)
 {
-    std::cout << "Usage: lzwtree in_file -o out_file" << std::endl;
+    std::cout << "Usage: lzwtree in_file -o out_file (i,p,k)" << std::endl;
 }
 
 int
 main (int argc, char *argv[])
 {
-	std::cout << "InOrder esetén 1, PostOrder esetén 2, PreOrder esetén 3" << std::endl;
-	std::cin >> order;
     // http://progpater.blog.hu/2011/03/12/hey_mikey_he_likes_it_ready_for_more_3
     // alapján a parancssor argok ottani elegáns feldolgozásából kb. ennyi marad:
     // "*((*++argv)+1)"...
 
     // a kiírás szerint ./lzwtree in_file -o out_file alakra kell mennie, ez 4 db arg:
-    if (argc != 4)
+    if (argc != 5)
     {
         // ha nem annyit kapott a program, akkor felhomályosítjuk erről a júzetr:
         usage ();
@@ -520,10 +514,11 @@ main (int argc, char *argv[])
     }
 
     // "Megjegyezzük" a bemenő fájl nevét
-    char *inFile = *++argv;
+    char *inFile = argv[1];
 
     // a -o kapcsoló jön?
-    if (*((*++argv) + 1) != 'o')
+    //if (*((*++argv) + 1) != 'o')
+    if (argv[2][1] != 'o')
     {
         usage ();
         return -2;
@@ -540,7 +535,10 @@ main (int argc, char *argv[])
         return -3;
     }
 
-    std::fstream kiFile (*++argv, std::ios_base::out);
+    //std::fstream kiFile (*++argv, std::ios_base::out);
+    std::fstream kiFile (argv[3], std::ios_base::out);
+
+   order = argv[4][0];
 
     unsigned char b;		// ide olvassik majd a bejövő fájl bájtjait
     LZWBinFa binFa;		// s nyomjuk majd be az LZW fa objektumunkba
@@ -608,4 +606,3 @@ main (int argc, char *argv[])
 
     return 0;
 }
-
